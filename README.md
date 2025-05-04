@@ -61,3 +61,43 @@ func Example() {
 	// true
 }
 ```
+
+```go
+
+func ExampleRender() {
+	list := []prompts.Prompt{
+		{
+			ID:           "quantum_agent",
+			Version:      "0.0.1",
+			Description:  "Agent for Quantum Computation.",
+			SystemPrompt: "You are a helpful agent who can answer user questions about the {{.topic}}.",
+			UserPrompt:   "What is {{.topic}}?",
+			Default:      true,
+		},
+	}
+
+	manager, err := prompts.New(list)
+	if err != nil {
+		panic(err)
+	}
+
+	prompt, err := manager.Get("quantum_agent")
+	if err != nil {
+		panic(err)
+	}
+
+	rendered, err := prompts.Render(prompt, map[string]string{
+		"topic": "Shor's algorithm",
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(rendered.SystemPrompt)
+	fmt.Println(rendered.UserPrompt)
+
+	// Output:
+	// You are a helpful agent who can answer user questions about the Shor's algorithm.
+	// What is Shor's algorithm?
+}
+```

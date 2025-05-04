@@ -1,6 +1,10 @@
 package prompts
 
-import "fmt"
+import (
+	"bytes"
+	"fmt"
+	"text/template"
+)
 
 type Prompt struct {
 	ID           string `json:"id"`
@@ -76,4 +80,39 @@ func (m *Manager) Get(id string, version ...string) (*Prompt, error) {
 	}
 
 	return &p, nil
+}
+
+func Render(p *Prompt, data any) (*Prompt, error) {
+	render := func(tmplStr string) (string, error) {
+		tmpl, err := template.New("").Parse(tmplStr)
+		if err != nil {
+			return "", fmt.Errorf("new template: %w", err)
+		}
+
+		var buf bytes.Buffer
+		if err := tmpl.Execute(&buf, data); err != nil {
+			return "", fmt.Errorf("execute template: %w", err)
+		}
+
+		return buf.String(), nil
+	}
+
+	system, err := render(p.SystemPrompt)
+	if err != nil {
+		return nil, fmt.Errorf("render system prompt: %w", err)
+	}
+
+	user, err := render(p.UserPrompt)
+	if err != nil {
+		return nil, fmt.Errorf("render user prompt: %w", err)
+	}
+
+	return &Prompt{
+		ID:           p.ID,
+		Version:      p.Version,
+		Description:  p.Description,
+		SystemPrompt: system,
+		UserPrompt:   user,
+		Default:      p.Default,
+	}, nil
 }

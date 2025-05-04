@@ -21,7 +21,7 @@ func Example() {
 			Description:  "Agent for Quantum Computation and Quantum Information.",
 			SystemPrompt: "You are a helpful agent who can answer user questions about the Quantum Computation and Quantum Information.",
 			UserPrompt:   "What is Quantum Computation and Quantum Information?",
-			Default:      true,
+			IsDefault:      true,
 		},
 		{
 			ID:           "google_search_agent",
@@ -29,7 +29,7 @@ func Example() {
 			Description:  "Agent to answer questions using Google Search.",
 			SystemPrompt: "You are a specialist in Google Search",
 			UserPrompt:   "Search for Shor's algorithm and explain it to me.",
-			Default:      true,
+			IsDefault:      true,
 		},
 	}
 
@@ -50,7 +50,7 @@ func Example() {
 	fmt.Println(prompt.Description)
 	fmt.Println(prompt.SystemPrompt)
 	fmt.Println(prompt.UserPrompt)
-	fmt.Println(prompt.Default)
+	fmt.Println(prompt.IsDefault)
 
 	// Output:
 	// quantum_agent
@@ -72,7 +72,7 @@ func ExampleRender() {
 			Description:  "Agent for Quantum Computation.",
 			SystemPrompt: "You are a helpful agent who can answer user questions about the {{.topic}}.",
 			UserPrompt:   "What is {{.topic}}?",
-			Default:      true,
+			IsDefault:      true,
 		},
 	}
 

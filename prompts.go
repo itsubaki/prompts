@@ -12,7 +12,7 @@ type Prompt struct {
 	Description  string `json:"description"`
 	SystemPrompt string `json:"systemPrompt"`
 	UserPrompt   string `json:"userPrompt"`
-	Default      bool   `json:"default"`
+	IsDefault    bool   `json:"is_default"`
 }
 
 type Manager struct {
@@ -35,7 +35,7 @@ func New(prompts []Prompt) (*Manager, error) {
 			return nil, fmt.Errorf("prompt with ID %s and version %s already exists", p.ID, p.Version)
 		}
 
-		if p.Default {
+		if p.IsDefault {
 			if _, ok := m.defaultIndex[p.ID]; ok {
 				return nil, fmt.Errorf("default prompt with ID %s already exists", p.ID)
 			}
@@ -113,6 +113,6 @@ func Render(p *Prompt, data any) (*Prompt, error) {
 		Description:  p.Description,
 		SystemPrompt: system,
 		UserPrompt:   user,
-		Default:      p.Default,
+		IsDefault:    p.IsDefault,
 	}, nil
 }

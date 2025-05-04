@@ -24,7 +24,7 @@ func Example() {
 			Default:      true,
 		},
 		{
-			ID:           "google_saerch",
+			ID:           "google_search",
 			Version:      "0.0.1",
 			Description:  "Agent to answer questions using Google Search.",
 			SystemPrompt: "You are a specialist in Google Search",

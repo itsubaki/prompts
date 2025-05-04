@@ -65,16 +65,12 @@ func (m *Manager) Get(id string, version ...string) (*Prompt, error) {
 		return &p, nil
 	}
 
-	return m.GetWith(id, version[0])
-}
-
-func (m *Manager) GetWith(id, version string) (*Prompt, error) {
 	vp, ok := m.versionIndex[id]
 	if !ok {
 		return nil, fmt.Errorf("prompt with ID %s not found", id)
 	}
 
-	p, ok := vp[version]
+	p, ok := vp[version[0]]
 	if !ok {
 		return nil, fmt.Errorf("prompt with ID %s and version %s not found", id, version)
 	}

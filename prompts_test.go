@@ -59,7 +59,7 @@ func Example() {
 	// true
 }
 
-func ExampleManager_GetWith() {
+func ExampleManager_Get() {
 	list := []prompts.Prompt{
 		{
 			ID:           "quantum_agent",

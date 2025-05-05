@@ -31,6 +31,10 @@ func New(prompts []Prompt) (*Manager, error) {
 			return nil, fmt.Errorf("prompt id and version is empty")
 		}
 
+		if m.versionIndex[p.ID] == nil {
+			m.versionIndex[p.ID] = make(map[string]Prompt)
+		}
+
 		if _, ok := m.versionIndex[p.ID][p.Version]; ok {
 			return nil, fmt.Errorf("prompt with ID %s and version %s already exists", p.ID, p.Version)
 		}
@@ -41,10 +45,6 @@ func New(prompts []Prompt) (*Manager, error) {
 			}
 
 			m.defaultIndex[p.ID] = p
-		}
-
-		if m.versionIndex[p.ID] == nil {
-			m.versionIndex[p.ID] = make(map[string]Prompt)
 		}
 
 		m.versionIndex[p.ID][p.Version] = p

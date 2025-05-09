@@ -13,6 +13,24 @@ type Prompt struct {
 	SystemPrompt string `json:"systemPrompt"`
 	UserPrompt   string `json:"userPrompt"`
 	IsDefault    bool   `json:"is_default"`
+	Template     *Template
+}
+
+func (p Prompt) With(template *Template) Prompt {
+	return Prompt{
+		ID:           p.ID,
+		Version:      p.Version,
+		Description:  p.Description,
+		SystemPrompt: p.SystemPrompt,
+		UserPrompt:   p.UserPrompt,
+		IsDefault:    p.IsDefault,
+		Template:     template,
+	}
+}
+
+type Template struct {
+	SystemPrompt *template.Template
+	UserPrompt   *template.Template
 }
 
 type Manager struct {
@@ -26,11 +44,29 @@ func New(prompts []Prompt) (*Manager, error) {
 		versionIndex: make(map[string]map[string]Prompt),
 	}
 
+	parsed := make([]Prompt, 0, len(prompts))
 	for _, p := range prompts {
 		if p.ID == "" || p.Version == "" {
-			return nil, fmt.Errorf("prompt id and version is empty")
+			return nil, fmt.Errorf("prompt id or version is empty")
 		}
 
+		system, err := template.New("system_prompt").Parse(p.SystemPrompt)
+		if err != nil {
+			return nil, fmt.Errorf("new system prompt template: %w", err)
+		}
+
+		user, err := template.New("user_prompt").Parse(p.UserPrompt)
+		if err != nil {
+			return nil, fmt.Errorf("new user prompt template: %w", err)
+		}
+
+		parsed = append(parsed, p.With(&Template{
+			SystemPrompt: system,
+			UserPrompt:   user,
+		}))
+	}
+
+	for _, p := range parsed {
 		if m.versionIndex[p.ID] == nil {
 			m.versionIndex[p.ID] = make(map[string]Prompt)
 		}
@@ -50,7 +86,7 @@ func New(prompts []Prompt) (*Manager, error) {
 		m.versionIndex[p.ID][p.Version] = p
 	}
 
-	for _, p := range prompts {
+	for _, p := range parsed {
 		if _, ok := m.defaultIndex[p.ID]; !ok {
 			return nil, fmt.Errorf("default prompt with ID %s not found", p.ID)
 		}
@@ -83,12 +119,7 @@ func (m *Manager) Get(id string, version ...string) (*Prompt, error) {
 }
 
 func Render(p *Prompt, data any) (*Prompt, error) {
-	render := func(tmplStr string) (string, error) {
-		tmpl, err := template.New("").Parse(tmplStr)
-		if err != nil {
-			return "", fmt.Errorf("new template: %w", err)
-		}
-
+	render := func(tmpl *template.Template) (string, error) {
 		var buf bytes.Buffer
 		if err := tmpl.Execute(&buf, data); err != nil {
 			return "", fmt.Errorf("execute template: %w", err)
@@ -97,12 +128,12 @@ func Render(p *Prompt, data any) (*Prompt, error) {
 		return buf.String(), nil
 	}
 
-	system, err := render(p.SystemPrompt)
+	system, err := render(p.Template.SystemPrompt)
 	if err != nil {
 		return nil, fmt.Errorf("render system prompt: %w", err)
 	}
 
-	user, err := render(p.UserPrompt)
+	user, err := render(p.Template.UserPrompt)
 	if err != nil {
 		return nil, fmt.Errorf("render user prompt: %w", err)
 	}
@@ -114,5 +145,6 @@ func Render(p *Prompt, data any) (*Prompt, error) {
 		SystemPrompt: system,
 		UserPrompt:   user,
 		IsDefault:    p.IsDefault,
+		Template:     p.Template,
 	}, nil
 }

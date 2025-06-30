@@ -3,7 +3,7 @@
  * LLM prompt manager
 
 
-## Example
+## Examples
 
 ```go
 import (
